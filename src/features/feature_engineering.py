@@ -119,7 +119,7 @@ def main() -> None:
     params = load_params(params_path=params_path)
 
     # Training encoder
-    vectorizer = train_vectorizer(train_df=train_df, max_features=params["max_features"], save_path=models_path)
+    vectorizer = train_vectorizer(train_df=train_df, max_features=params["bow_max_features"], save_path=models_path)
 
     # Transforming Features
     logger.info(msg="Encoding train dataset")

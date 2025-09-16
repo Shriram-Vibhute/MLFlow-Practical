@@ -33,8 +33,25 @@ def load_params(params_path: pathlib.Path) -> Dict[str, Any]:
         if 'model_training' not in params:
             logger.error("model_training section not found in parameters file")
             raise KeyError("model_training section not found in parameters file")
+        
+        # Preprocessing the params
+        processed_params = {
+            "bagging": dict(),
+            "estimator": dict()
+        }
+        for key, value in params['model_training']["bagging"].items():
+            if str(key).startswith("bagging"):
+                processed_params["bagging"][str(key).removeprefix("bagging_")] = value
+            else:
+                processed_params[key] = value
+        
+        for key, value in params['model_training']["estimator"].items():
+            if str(key).startswith("estimator"):
+                processed_params["estimator"][str(key).removeprefix("estimator_")] = value
+            else:
+                processed_params[key] = value
 
-        return params['model_training']
+        return processed_params
 
 # Build and Train Random Forest model
 def train_model(df: pd.DataFrame, params: Dict[str, str]) -> BaggingClassifier:
