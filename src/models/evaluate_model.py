@@ -154,7 +154,21 @@ def main() -> None:
 
     # dvclive storing path
     dvclive_path = home_dir / "dvclive"
-    with mlflow.start_run() as run:
+
+    # Creating new experiment
+    experiment_id = mlflow.create_experiment(name="bagging_classifier_50_bow_features")
+
+    tags = {
+        "engineering": "ML Platform",
+        "release.candidate": "Shriram",
+        "release.version": "1.0.0",
+        "model.type": "BaggingClassifier",
+        "feature.engineering": "Bag of Words"
+    }   
+    with mlflow.start_run(experiment_id=experiment_id) as run:
+        # Logging tags
+        mlflow.set_tags(tags)
+        
         # Loading data
         train_df, test_df = load_data(data_dir=data_dir)
 
