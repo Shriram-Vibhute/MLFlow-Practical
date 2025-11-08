@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import yaml
 import mlflow
 import matplotlib.pyplot as plt
-from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import ConfusionMatrixDisplay, PrecisionRecallDisplay, precision_recall_curve
 
 
 # Loading Data - Train and Test
@@ -58,7 +58,7 @@ def load_params(params_path: pathlib.Path) -> None:
         mlflow.log_params(params["model_training"]["bagging"])
 
 # Loading Model
-def load_model(model_dir: str) -> BaggingClassifier:
+def load_model(model_dir: str, sample_input: pd.DataFrame) -> BaggingClassifier:
     logger = logging.getLogger(__name__)
 
     # Loading Model
@@ -68,8 +68,11 @@ def load_model(model_dir: str) -> BaggingClassifier:
 
     # Logging model using MLflow
     logger.info(f"Logging model using MLflow from {model_path}")
-    mlflow.sklearn.log_model(model)
+    sample_output = model.predict(sample_input)
+    signature = mlflow.models.infer_signature(sample_input, sample_output) # This is automatic signature. You can also define it manually by defining the datatype of every single feature in your dataframe.
+    mlflow.sklearn.log_model(model, signature=signature)
 
+    # Why model signatures are needed?
     return model
 
 # Evaluating Model
@@ -117,6 +120,15 @@ def evaluate_model(df: pd.DataFrame, model: BaggingClassifier, split: str) -> No
     mlflow.log_figure(fig, f"{split}_confusion_matrix.png")
     plt.close()
 
+    # Log precision-recall curve plot using MLflow
+    precision, recall, _ = precision_recall_curve(y_true=y, y_score=predictions)
+    fig, ax = plt.subplots(figsize=(10, 8))
+    disp = PrecisionRecallDisplay(precision=precision, recall=recall)
+    disp.plot(ax=ax)
+    plt.title(f'Precision-Recall Curve - {split} set')
+    mlflow.log_figure(fig, f"{split}_precision_recall_curve.png")
+    plt.close()
+
 # Forming Logger
 def form_logger() -> logging.Logger:
     logger = logging.getLogger()
@@ -156,7 +168,8 @@ def main() -> None:
     dvclive_path = home_dir / "dvclive"
 
     # Creating new experiment
-    experiment_id = mlflow.create_experiment(name="bagging_classifier_50_bow_features")
+    # experiment_id = mlflow.create_experiment(name="bagging_classifier_50_bow_features") # If experiment already exists then dont create it again otherwise throw error.
+    experiment_id = mlflow.get_experiment_by_name(name="bagging_classifier_50_bow_features").experiment_id
 
     tags = {
         "engineering": "ML Platform",
@@ -165,7 +178,12 @@ def main() -> None:
         "model.type": "BaggingClassifier",
         "feature.engineering": "Bag of Words"
     }   
-    with mlflow.start_run(experiment_id=experiment_id) as run:
+    with mlflow.start_run(
+        experiment_id=experiment_id,
+        run_name="bagging_classifier_50_bow_features_run_3",
+        tags=tags,
+        nested=False,
+        description="Model evaluation run for bagging classifier with 50 bag of words features") as run:
         # Logging tags
         mlflow.set_tags(tags)
         
@@ -176,7 +194,7 @@ def main() -> None:
         load_params(params_path=params_path)
 
         # Loading model
-        model = load_model(model_dir=model_dir)
+        model = load_model(model_dir=model_dir, sample_input=train_df.dropna().drop(columns=["sentiment", "content"]).iloc[:3, :])
 
         # Evaluating model
         evaluate_model(df=train_df, model=model, split="train")

@@ -9,8 +9,8 @@ stages:
       size: 827954
     - path: params.yaml
       hash: md5
-      md5: 174426eaa1ec3b2186042247f4265aad
-      size: 519
+      md5: 6dbe23aa71e3f26c40ccd8492dec8e19
+      size: 520
     - path: src/data/data_ingestion.py
       hash: md5
       md5: 4f33a0f842b650f6f736c6f35400f71d
@@ -65,8 +65,8 @@ stages:
       size: 439554
     - path: params.yaml
       hash: md5
-      md5: 174426eaa1ec3b2186042247f4265aad
-      size: 519
+      md5: 6dbe23aa71e3f26c40ccd8492dec8e19
+      size: 520
     - path: src/features/feature_engineering.py
       hash: md5
       md5: 5fc1ba202cfc05fdb8492935defb40f5
@@ -74,27 +74,27 @@ stages:
     outs:
     - path: data/features/test.csv
       hash: md5
-      md5: a61d811374affd4c8d4fa9e23ec02ab4
-      size: 528867
+      md5: 8629c7232acc4a1be16dcdf2fe81cae5
+      size: 1358917
     - path: data/features/train.csv
       hash: md5
-      md5: 575bf14910945378337b4bd5d29032a9
-      size: 2115939
+      md5: 216bd3a0961ccff75cd695b90236a706
+      size: 5435589
     - path: models/vectorizers/bow.joblib
       hash: md5
-      md5: a261e3f58528d7c28440910238b1187e
-      size: 1859
+      md5: 1b9be5fe50bafce3142f3a1cadb52005
+      size: 4531
   model_training:
     cmd: python src/models/train_model.py
     deps:
     - path: data/features/train.csv
       hash: md5
-      md5: 575bf14910945378337b4bd5d29032a9
-      size: 2115939
+      md5: 216bd3a0961ccff75cd695b90236a706
+      size: 5435589
     - path: params.yaml
       hash: md5
-      md5: 174426eaa1ec3b2186042247f4265aad
-      size: 519
+      md5: 6dbe23aa71e3f26c40ccd8492dec8e19
+      size: 520
     - path: src/models/train_model.py
       hash: md5
       md5: 77d541b5c3d35c165842a42c29dcdfa4
@@ -102,16 +102,16 @@ stages:
     outs:
     - path: models/models/bagging_classifier.joblib
       hash: md5
-      md5: 10bd930ae9653b5566dcf268b268dd0a
-      size: 1557224
+      md5: e4803791ae3725438708d4cfb195884d
+      size: 3362408
   model_evaluation:
     cmd: python src/models/evaluate_model.py
     deps:
     - path: data/features/test.csv
       hash: md5
-      md5: a61d811374affd4c8d4fa9e23ec02ab4
-      size: 528867
+      md5: 8629c7232acc4a1be16dcdf2fe81cae5
+      size: 1358917
     - path: models/models/bagging_classifier.joblib
       hash: md5
-      md5: 10bd930ae9653b5566dcf268b268dd0a
-      size: 1557224
+      md5: e4803791ae3725438708d4cfb195884d
+      size: 3362408
